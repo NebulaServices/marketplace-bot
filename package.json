@@ -1,0 +1,28 @@
+{
+    "name": "marketplace-bot",
+    "version": "1.0.0",
+    "description": "A bot for submitting packages to the Nebula marketplace from Discord.",
+    "main": "index.js",
+    "scripts": {
+        "dev": "tsx watch src/index.ts",
+        "start": "node dist/index.js",
+        "build": "tsup src/index.ts --minify",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [],
+    "author": "rifting",
+    "license": "AGPL-3.0-only",
+    "dependencies": {
+        "discord.js": "^14.14.1",
+        "dotenv": "^16.4.5",
+        "sequelize": "^6.37.1",
+        "sqlite3": "^5.1.7",
+        "uuid": "^10.0.0"
+    },
+    "devDependencies": {
+        "@types/uuid": "^10.0.0",
+        "tsup": "^8.0.2",
+        "tsx": "^4.7.1",
+        "typescript": "^5.3.3"
+    }
+}
