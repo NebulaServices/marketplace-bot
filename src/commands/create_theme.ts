@@ -13,6 +13,8 @@ import {
 import { v4 as uuidv4 } from "uuid";
 import { client } from "..";
 import { upload_bg_image } from "../api/bg-image";
+import { upload_package_metadata } from "../api/meta";
+import { upload_style } from "../api/style";
 
 export const data = new SlashCommandBuilder()
   .setName("create_theme")
@@ -133,6 +135,12 @@ export async function execute(interaction: any) {
 
         const res_blob = await response.blob();
 
+        const payload_response = await fetch(
+          interaction.options.getAttachment("stylesheet").url
+        );
+
+        const payload_res_blob = await payload_response.blob();
+
         upload_bg_image(
           res_blob,
           package_uuid +
@@ -145,6 +153,100 @@ export async function execute(interaction: any) {
               .split(".")
               .pop()
         );
+
+        upload_style(
+          payload_res_blob,
+          package_uuid +
+            "." +
+            interaction.options
+              .getAttachment("stylesheet")
+              .url.split("/")
+              .pop()
+              .split("?")[0]
+              .split(".")
+              .pop()
+        );
+
+        const backgroundImageUrl =
+          interaction.options.getAttachment("background_image")?.url;
+        const backgroundVideoUrl =
+          interaction.options.getAttachment("background_vudeo")?.url;
+
+        if (backgroundImageUrl) {
+          const bg_image_url_res = await fetch(backgroundImageUrl);
+
+          const bg_image_url_res_blob = await bg_image_url_res.blob();
+
+          upload_bg_image(
+            bg_image_url_res_blob,
+            package_uuid +
+              "_BACKGROUND" +
+              "." +
+              backgroundImageUrl.split("/").pop().split("?")[0].split(".").pop()
+          );
+
+          upload_package_metadata(
+            // Vanilla
+            package_uuid,
+            interaction.options.getString("title"),
+            interaction.options.getString("tags"),
+            interaction.options.getString("description"),
+            interaction.user.username,
+            package_uuid +
+              "." +
+              interaction.options
+                .getAttachment("image")
+                .url.split("/")
+                .pop()
+                .split("?")[0]
+                .split(".")
+                .pop(),
+            "theme",
+            "1.0.0",
+            package_uuid +
+              "." +
+              interaction.options
+                .getAttachment("stylesheet")
+                .url.split("/")
+                .pop()
+                .split("?")[0]
+                .split(".")
+                .pop(),
+            package_uuid +
+              "_BACKGROUND." +
+              backgroundImageUrl.split("/").pop().split("?")[0].split(".").pop()
+          );
+        } else if (backgroundVideoUrl) {
+        } else {
+          upload_package_metadata(
+            // Vanilla
+            package_uuid,
+            interaction.options.getString("title"),
+            interaction.options.getString("tags"),
+            interaction.options.getString("description"),
+            interaction.user.username,
+            package_uuid +
+              "." +
+              interaction.options
+                .getAttachment("image")
+                .url.split("/")
+                .pop()
+                .split("?")[0]
+                .split(".")
+                .pop(),
+            "theme",
+            "1.0.0",
+            package_uuid +
+              "." +
+              interaction.options
+                .getAttachment("stylesheet")
+                .url.split("/")
+                .pop()
+                .split("?")[0]
+                .split(".")
+                .pop()
+          );
+        }
       } catch (e) {
         console.error("err", e);
       }
