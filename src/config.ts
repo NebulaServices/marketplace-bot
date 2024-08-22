@@ -2,9 +2,9 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const { DISCORD_TOKEN, DISCORD_CLIENT_ID, GUILDID } = process.env;
+const { DISCORD_TOKEN, DISCORD_CLIENT_ID, GUILDID, PSK, NEBULA_URL } = process.env;
 
-if (!DISCORD_TOKEN || !DISCORD_CLIENT_ID || !GUILDID) {
+if (!DISCORD_TOKEN || !DISCORD_CLIENT_ID || !GUILDID || !PSK || !NEBULA_URL) {
   throw new Error("Missing environment variables");
 }
 
@@ -12,4 +12,6 @@ export const config = {
   DISCORD_TOKEN,
   DISCORD_CLIENT_ID,
   GUILDID,
+  PSK,
+  NEBULA_URL
 };

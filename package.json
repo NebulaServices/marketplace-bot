@@ -15,6 +15,7 @@
     "dependencies": {
         "discord.js": "^14.14.1",
         "dotenv": "^16.4.5",
+        "formdata-node": "^6.0.3",
         "sequelize": "^6.37.1",
         "sqlite3": "^5.1.7",
         "uuid": "^10.0.0"

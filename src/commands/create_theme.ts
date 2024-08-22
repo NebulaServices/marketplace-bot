@@ -12,6 +12,7 @@ import {
 } from "discord.js";
 import { v4 as uuidv4 } from "uuid";
 import { client } from "..";
+import { upload_bg_image } from "../api/bg-image";
 
 export const data = new SlashCommandBuilder()
   .setName("create_theme")
@@ -124,6 +125,30 @@ export async function execute(interaction: any) {
     if (confirmation.customId === "accept") {
       const package_uuid = uuidv4();
       console.log("Approved theme", interaction.options.getString("title"));
+      console.log(interaction.options.getAttachment("image").url);
+      try {
+        const response = await fetch(
+          interaction.options.getAttachment("image").url
+        );
+
+        const res_blob = await response.blob();
+
+        upload_bg_image(
+          res_blob,
+          package_uuid +
+            "." +
+            interaction.options
+              .getAttachment("image")
+              .url.split("/")
+              .pop()
+              .split("?")[0]
+              .split(".")
+              .pop()
+        );
+      } catch (e) {
+        console.error("err", e);
+      }
+
       await confirmation.update({
         content:
           "Successfully accepted theme and put on marketplace with UUID " +
