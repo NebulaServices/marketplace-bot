@@ -114,10 +114,23 @@ export async function execute(interaction: any) {
       deny
     );
 
+    const backgroundImageUrl =
+      interaction.options.getAttachment("background_image")?.url;
+    const backgroundVideoUrl =
+      interaction.options.getAttachment("background_video")?.url;
+
+    const files = [interaction.options.getAttachment("stylesheet")];
+
+    if (backgroundImageUrl) {
+      files.push(interaction.options.getAttachment("background_image"));
+    } else if (backgroundVideoUrl) {
+      files.push(interaction.options.getAttachment("background_video"));
+    }
+
     const new_msg = channel.send({
       embeds: [exampleEmbed],
       components: [ActionRowComponent as any],
-      files: [interaction.options.getAttachment("stylesheet")],
+      files: files,
     });
 
     interaction.editReply(
@@ -167,11 +180,6 @@ export async function execute(interaction: any) {
               .split(".")
               .pop()
         );
-
-        const backgroundImageUrl =
-          interaction.options.getAttachment("background_image")?.url;
-        const backgroundVideoUrl =
-          interaction.options.getAttachment("background_video")?.url;
 
         if (backgroundImageUrl) {
           const bg_image_url_res = await fetch(backgroundImageUrl);
