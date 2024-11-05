@@ -6,7 +6,7 @@ import { uploadPackageMetadata } from "../api/meta";
 import { uploadJS } from "../api/javascript";
 
 export const data = new SlashCommandBuilder()
-  .setName("create_plugin")
+  .setName("createplugin")
   .setDescription("Create your own marketplace plugin!")
   .addStringOption((option) =>
     option.setName("title").setDescription("The title for this plugin").setRequired(true)
@@ -30,7 +30,9 @@ export const data = new SlashCommandBuilder()
                    
 
 export async function execute(interaction: any) {
+  console.log('Executing....');
   await interaction.deferReply({ ephemeral: true });
+  client.channels.fetch('1273820292820766802');
   const channel = client.channels.cache.get("1273820292820766802") as TextChannel;
   const exampleEmbed = new EmbedBuilder()
     .setColor(0x0099ff)
@@ -65,7 +67,7 @@ export async function execute(interaction: any) {
     components: [ActionRowComponent as any],
     files: files,
   });
-
+  console.log('Edit reply');
   interaction.editReply("Your plugin has been sent to staff for approval! Please wait 1-3 days for it to appear on Nebula!");
 
   const confirmation = await (await newMsg).awaitMessageComponent({});
@@ -78,7 +80,6 @@ export async function execute(interaction: any) {
       const res = await response.blob();
       const payload = await fetch(interaction.options.getAttachment("javascript").url);
       const payloadRes = await payload.blob(); 
-
       await uploadPackageMetadata(
         // Vanilla
         packageUuid,
@@ -92,8 +93,8 @@ export async function execute(interaction: any) {
         `${packageUuid}.${interaction.options.getAttachment("javascript").url.split("/").pop().split("?")[0].split(".").pop()}`
       );
 
-      await uploadBgImage(res, `${packageUuid}.${interaction.options.getAttachment("image").url.split("/").pop().split("?")[0].split(".").pop()}`);
-      await uploadJS(payloadRes, `${packageUuid}.${interaction.options.getAttachment("javascript").url.split("/").pop().split("?")[0].split(".").pop()}`); 
+      await uploadBgImage(res, `${packageUuid}.${interaction.options.getAttachment("image").url.split("/").pop().split("?")[0].split(".").pop()}`, packageUuid);
+      await uploadJS(payloadRes, `${packageUuid}.${interaction.options.getAttachment("javascript").url.split("/").pop().split("?")[0].split(".").pop()}`, packageUuid); 
     } 
     catch (e) { console.error("err", e) }
     await confirmation.update({

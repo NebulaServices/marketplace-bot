@@ -15,10 +15,8 @@ export async function deployCommands({ guildId }: DeployCommandsProps) {
     console.log("Started refreshing application (/) commands.");
 
     await rest.put(
-      Routes.applicationGuildCommands(config.DISCORD_CLIENT_ID, guildId),
-      {
-        body: commandsData,
-      }
+      Routes.applicationGuildCommands(config.DISCORD_CLIENT_ID, guildId), 
+      { body: commandsData }
     );
 
     console.log("Successfully reloaded application (/) commands.");

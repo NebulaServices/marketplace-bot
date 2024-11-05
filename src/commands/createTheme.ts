@@ -3,11 +3,11 @@ import { v4 as uuidv4 } from "uuid";
 import { client } from "..";
 import { uploadBgImage } from "../api/bgImage";
 import { uploadPackageMetadata } from "../api/meta";
-import { upload_style } from "../api/style";
+import { uploadStyle } from "../api/style";
 import { uploadBgVideo } from "../api/bgVideo";
 
 export const data = new SlashCommandBuilder()
-  .setName("create_theme")
+  .setName("createtheme")
   .setDescription("Create your own marketplace theme!")
   .addStringOption((option) =>
     option
@@ -112,7 +112,7 @@ export async function execute(interaction: any) {
 
     const confirmation = await (await newMsg).awaitMessageComponent({});
     if (confirmation.customId === "accept") {
-      const package_uuid = uuidv4();
+      const packageUUID = uuidv4();
       console.log("Approved theme", interaction.options.getString("title"));
       console.log(interaction.options.getAttachment("image").url);
       try {
@@ -120,173 +120,55 @@ export async function execute(interaction: any) {
         const res = await response.blob();
         const payload = await fetch(interaction.options.getAttachment("stylesheet").url);
         const payloadRes = await payload.blob();
-
-        upload_bg_image(
-          res_blob,
-          package_uuid +
-            "." +
-            interaction.options
-              .getAttachment("image")
-              .url.split("/")
-              .pop()
-              .split("?")[0]
-              .split(".")
-              .pop()
+        
+        await uploadPackageMetadata(
+            // Vanilla
+            packageUUID,
+            interaction.options.getString("title"),
+            interaction.options.getString("tags").split(","),
+            interaction.options.getString("description"),
+            interaction.user.username,
+            `${packageUUID}.${interaction.options.getAttachment("image").url.split("/").pop().split("?")[0].split(".").pop()}`,
+            "theme",
+            "1.0.0",
+            `${packageUUID}.${interaction.options.getAttachment("stylesheet").url.split("/").pop().split("?")[0].split(".").pop()}`,
+            backgroundImageUrl ? `${packageUUID}_BACKGROUND.${backgroundImageUrl.split("/").pop().split("?")[0].split(".").pop()}` : undefined,
+            backgroundVideoUrl ? `${packageUUID}_BACKGROUND.${backgroundVideoUrl.split("/").pop().split("?")[0].split(".").pop()}` : undefined
         );
-
-        upload_style(
-          payload_res_blob,
-          package_uuid +
-            "." +
-            interaction.options
-              .getAttachment("stylesheet")
-              .url.split("/")
-              .pop()
-              .split("?")[0]
-              .split(".")
-              .pop()
-        );
-
+        
+        await uploadBgImage(res, `${packageUUID}.${interaction.options.getAttachment("image").url.split("/").pop().split("?")[0].split(".").pop()}`, packageUUID);
+        await uploadStyle(payloadRes, `${packageUUID}.${interaction.options.getAttachment("stylesheet").url.split("/").pop().split("?")[0].split(".").pop()}`, packageUUID); 
+        
         if (backgroundImageUrl) {
-          const bg_image_url_res = await fetch(backgroundImageUrl);
-
-          const bg_image_url_res_blob = await bg_image_url_res.blob();
-
-          upload_bg_image(
-            bg_image_url_res_blob,
-            package_uuid +
-              "_BACKGROUND" +
-              "." +
-              backgroundImageUrl.split("/").pop().split("?")[0].split(".").pop()
-          );
-
-          upload_package_metadata(
-            // Vanilla
-            package_uuid,
-            interaction.options.getString("title"),
-            interaction.options.getString("tags").split(","),
-            interaction.options.getString("description"),
-            interaction.user.username,
-            package_uuid +
-              "." +
-              interaction.options
-                .getAttachment("image")
-                .url.split("/")
-                .pop()
-                .split("?")[0]
-                .split(".")
-                .pop(),
-            "theme",
-            "1.0.0",
-            package_uuid +
-              "." +
-              interaction.options
-                .getAttachment("stylesheet")
-                .url.split("/")
-                .pop()
-                .split("?")[0]
-                .split(".")
-                .pop(),
-            package_uuid +
-              "_BACKGROUND." +
-              backgroundImageUrl.split("/").pop().split("?")[0].split(".").pop()
-          );
-        } else if (backgroundVideoUrl) {
-          // Background video
-          const bg_vid_url_res = await fetch(backgroundVideoUrl);
-
-          const bg_vid_url_res_blob = await bg_vid_url_res.blob();
-
-          upload_bg_video(
-            bg_vid_url_res_blob,
-            package_uuid +
-              "_BACKGROUND" +
-              "." +
-              backgroundVideoUrl.split("/").pop().split("?")[0].split(".").pop()
-          );
-
-          upload_package_metadata(
-            // Vanilla
-            package_uuid,
-            interaction.options.getString("title"),
-            interaction.options.getString("tags").split(","),
-            interaction.options.getString("description"),
-            interaction.user.username,
-            package_uuid +
-              "." +
-              interaction.options
-                .getAttachment("image")
-                .url.split("/")
-                .pop()
-                .split("?")[0]
-                .split(".")
-                .pop(),
-            "theme",
-            "1.0.0",
-            package_uuid +
-              "." +
-              interaction.options
-                .getAttachment("stylesheet")
-                .url.split("/")
-                .pop()
-                .split("?")[0]
-                .split(".")
-                .pop(),
-            undefined,
-            package_uuid +
-              "_BACKGROUND." +
-              backgroundVideoUrl.split("/").pop().split("?")[0].split(".").pop()
-          );
-        } else {
-          upload_package_metadata(
-            // Vanilla
-            package_uuid,
-            interaction.options.getString("title"),
-            interaction.options.getString("tags").split(","),
-            interaction.options.getString("description"),
-            interaction.user.username,
-            package_uuid +
-              "." +
-              interaction.options
-                .getAttachment("image")
-                .url.split("/")
-                .pop()
-                .split("?")[0]
-                .split(".")
-                .pop(),
-            "theme",
-            "1.0.0",
-            package_uuid +
-              "." +
-              interaction.options
-                .getAttachment("stylesheet")
-                .url.split("/")
-                .pop()
-                .split("?")[0]
-                .split(".")
-                .pop()
-          );
+            const res = await fetch(backgroundImageUrl);
+            const blob = await res.blob();
+            await uploadBgImage(blob, `${packageUUID}_BACKGROUND.${backgroundImageUrl.split("/").pop().split("?")[0].split(".").pop()}`, packageUUID);
         }
-      } catch (e) {
+        else if (backgroundVideoUrl) {
+            const res = await fetch(backgroundVideoUrl);
+            const blob = await res.blob();
+            await uploadBgVideo(blob, `${packageUUID}_BACKGROUND.${backgroundVideoUrl.split("/").pop().split("?")[0].split(".").pop()}`, packageUUID);
+        }
+    } catch (e) {
         console.error("err", e);
-      }
+    }
 
-      await confirmation.update({
+    await confirmation.update({
         content:
-          "Successfully accepted theme and put on marketplace with UUID " +
-          package_uuid,
+            "Successfully accepted theme and put on marketplace with UUID " +
+            packageUUID,
         components: [],
         embeds: [],
         files: [],
-      });
+    });
     } else if (confirmation.customId === "deny") {
-      console.log("Denied theme", interaction.options.getString("title"));
-      await confirmation.update({
-        content: "Successfully denied theme.",
-        components: [],
-        embeds: [],
-        files: [],
-      });
+        console.log("Denied theme", interaction.options.getString("title"));
+        await confirmation.update({
+            content: "Successfully denied theme.",
+            components: [],
+            embeds: [],
+            files: [],
+        });
     }
   }
 }

@@ -26,7 +26,7 @@ export async function uploadPackageMetadata(
     version: version,
     payload: payload,
     background_image: background_image_path,
-    bacgkround_video: background_video_path,
+    background_video: background_video_path,
   };
 
   console.log(JSON.stringify(pkgPayload));
