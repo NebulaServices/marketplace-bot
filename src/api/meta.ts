@@ -2,7 +2,7 @@ import { FormData, File } from "formdata-node";
 import { fileFromPath } from "formdata-node/file-from-path";
 import { config } from "../config";
 
-export function upload_package_metadata(
+export async function uploadPackageMetadata(
   uuid: string,
   title: string,
   tags: string,
@@ -15,28 +15,28 @@ export function upload_package_metadata(
   background_image_path?: string,
   background_video_path?: string
 ) {
-  const pkg_payload = {
-    uuid,
-    title,
-    tags,
-    description,
-    author,
-    image_path,
-    type,
-    version,
-    payload,
-    background_image_path,
-    background_video_path,
+  const pkgPayload = {
+    uuid: uuid,
+    title: title,
+    tags: tags,
+    description: description,
+    author: author,
+    image: image_path,
+    type: type,
+    version: version,
+    payload: payload,
+    background_image: background_image_path,
+    bacgkround_video: background_video_path,
   };
 
-  console.log(JSON.stringify(pkg_payload));
+  console.log(JSON.stringify(pkgPayload));
 
-  fetch(config.NEBULA_URL + "api/create-package", {
+  await fetch(config.NEBULA_URL + "api/create-package", {
     headers: {
       "Content-Type": "application/json",
       PSK: config.PSK,
     },
     method: "post",
-    body: JSON.stringify(pkg_payload),
+    body: JSON.stringify(pkgPayload),
   });
 }

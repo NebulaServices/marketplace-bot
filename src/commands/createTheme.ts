@@ -1,21 +1,10 @@
-import {
-  ActionRowBuilder,
-  ButtonBuilder,
-  ButtonStyle,
-  Channel,
-  CommandInteraction,
-  EmbedBuilder,
-  SlashCommandBuilder,
-  StringSelectMenuBuilder,
-  StringSelectMenuOptionBuilder,
-  TextChannel,
-} from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, SlashCommandBuilder, TextChannel } from "discord.js";
 import { v4 as uuidv4 } from "uuid";
 import { client } from "..";
-import { upload_bg_image } from "../api/bg-image";
-import { upload_package_metadata } from "../api/meta";
+import { uploadBgImage } from "../api/bgImage";
+import { uploadPackageMetadata } from "../api/meta";
 import { upload_style } from "../api/style";
-import { upload_bg_video } from "../api/bg-video";
+import { uploadBgVideo } from "../api/bgVideo";
 
 export const data = new SlashCommandBuilder()
   .setName("create_theme")
@@ -66,20 +55,13 @@ export const data = new SlashCommandBuilder()
   );
 
 export async function execute(interaction: any) {
-  await interaction.deferReply({
-    ephemeral: true,
-  });
-  if (
-    interaction.options.getAttachment("background_video") &&
-    interaction.options.getAttachment("background_image")
-  ) {
-    return interaction.editReply(
-      "You can't have a background video and image at the same time!"
-    );
-  } else {
-    const channel = client.channels.cache.get(
-      "1273820292820766802"
-    ) as TextChannel;
+  await interaction.deferReply({ ephemeral: true });
+
+  if (interaction.options.getAttachment("background_video") && interaction.options.getAttachment("background_image")) {
+    return interaction.editReply( "You can't have a background video and image at the same time!" );
+  } 
+  else {
+    const channel = client.channels.cache.get("1273820292820766802") as TextChannel;
 
     const exampleEmbed = new EmbedBuilder()
       .setColor(0x0099ff)
@@ -90,10 +72,7 @@ export async function execute(interaction: any) {
       .setDescription(interaction.options.getString("title"))
       .addFields(
         { name: "Title", value: interaction.options.getString("title") },
-        {
-          name: "Description",
-          value: interaction.options.getString("description"),
-        },
+        { name: "Description", value: interaction.options.getString("description") },
         { name: "Tags", value: interaction.options.getString("tags") }
       )
       .setImage(interaction.options.getAttachment("image").url)
@@ -109,51 +88,38 @@ export async function execute(interaction: any) {
       .setLabel("Accept")
       .setStyle(ButtonStyle.Success);
 
-    const ActionRowComponent = new ActionRowBuilder().addComponents(
-      accept,
-      deny
-    );
+    const ActionRowComponent = new ActionRowBuilder().addComponents(accept, deny);
 
-    const backgroundImageUrl =
-      interaction.options.getAttachment("background_image")?.url;
-    const backgroundVideoUrl =
-      interaction.options.getAttachment("background_video")?.url;
+    const backgroundImageUrl = interaction.options.getAttachment("background_image")?.url;
+    const backgroundVideoUrl = interaction.options.getAttachment("background_video")?.url;
 
     const files = [interaction.options.getAttachment("stylesheet")];
 
-    if (backgroundImageUrl) {
-      files.push(interaction.options.getAttachment("background_image"));
-    } else if (backgroundVideoUrl) {
+    if (backgroundImageUrl) { 
+        files.push(interaction.options.getAttachment("background_image")) 
+    } 
+    else if (backgroundVideoUrl) {
       files.push(interaction.options.getAttachment("background_video"));
     }
 
-    const new_msg = channel.send({
+    const newMsg = channel.send({
       embeds: [exampleEmbed],
       components: [ActionRowComponent as any],
       files: files,
     });
 
-    interaction.editReply(
-      "Your theme has been sent to staff for approval! Please wait 1-3 days for it to appear on Nebula!"
-    );
+    interaction.editReply("Your theme has been sent to staff for approval! Please wait 1-3 days for it to appear on Nebula!");
 
-    const confirmation = await (await new_msg).awaitMessageComponent({});
+    const confirmation = await (await newMsg).awaitMessageComponent({});
     if (confirmation.customId === "accept") {
       const package_uuid = uuidv4();
       console.log("Approved theme", interaction.options.getString("title"));
       console.log(interaction.options.getAttachment("image").url);
       try {
-        const response = await fetch(
-          interaction.options.getAttachment("image").url
-        );
-
-        const res_blob = await response.blob();
-
-        const payload_response = await fetch(
-          interaction.options.getAttachment("stylesheet").url
-        );
-
-        const payload_res_blob = await payload_response.blob();
+        const response = await fetch(interaction.options.getAttachment("image").url);
+        const res = await response.blob();
+        const payload = await fetch(interaction.options.getAttachment("stylesheet").url);
+        const payloadRes = await payload.blob();
 
         upload_bg_image(
           res_blob,
