@@ -2,7 +2,11 @@ import { FormData, File } from "formdata-node";
 import { fileFromPath } from "formdata-node/file-from-path";
 import { config } from "../config";
 
-export async function uploadBgVideo(video: any, payloadName: string, uuid: string) {
+export async function uploadBgVideo(
+  video: any,
+  payloadName: string,
+  uuid: string
+) {
   const form = new FormData();
   form.set("file", new File([video], payloadName));
 
@@ -11,9 +15,9 @@ export async function uploadBgVideo(video: any, payloadName: string, uuid: strin
   await fetch(config.NEBULA_URL + "api/upload-asset", {
     headers: {
       PSK: config.PSK,
-      packagename: uuid
+      packagename: uuid,
     },
     method: "post",
-    body: form
+    body: form,
   });
 }
